@@ -1,0 +1,13 @@
+# forders
+out/
+build/
+node_modules/
+.idea/
+.gradle/
+.DS_Store
+
+# files
+*.iml
+*.ipr
+*.iws
+*.log
