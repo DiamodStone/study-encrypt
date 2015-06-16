@@ -20,18 +20,18 @@ public class DigestTest {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        assertThat(digest.toString(data), is("7acedd1a84a4cfcb6e7a16003242945e"));
+        assertThat(digest.toString(data), is("7ACEDD1A84A4CFCB6E7A16003242945E"));
 
         data[50]++;
-        assertThat(digest.toString(data), is("e17805819b3512436b9f9269f6aa512b"));
+        assertThat(digest.toString(data), is("E17805819B3512436B9F9269F6AA512B"));
     }
 
     @Test
     public void test_md5_with_string() throws Exception {
         Digest digest = new Digest("MD5");
 
-        assertThat(digest.toString("hello", "utf-8"), is("5d41402abc4b2a76b9719d911017c592"));
-        assertThat(digest.toString("Hello", "utf-8"), is("8b1a9953c4611296a827abf8c47804d7"));
+        assertThat(digest.toString("hello", "utf-8"), is("5D41402ABC4B2A76B9719D911017C592"));
+        assertThat(digest.toString("Hello", "utf-8"), is("8B1A9953C4611296A827ABF8C47804D7"));
     }
 
     @Test
@@ -40,7 +40,7 @@ public class DigestTest {
 
         Path path = Paths.get(DigestTest.class.getResource("/photo-1.jpg").getFile());
         String result1 = digest.toString(Files.newInputStream(path, StandardOpenOption.READ));
-        assertThat(result1, is("b5745948dd3ca6669039d6e847137545"));
+        assertThat(result1, is("B5745948DD3CA6669039D6E847137545"));
 
         path = Paths.get(DigestTest.class.getResource("/photo-2.jpg").getFile());
         String result2 = digest.toString(Files.newInputStream(path, StandardOpenOption.READ));
@@ -53,8 +53,8 @@ public class DigestTest {
 
         Path path = Paths.get(DigestTest.class.getResource("/photo-1.jpg").getFile());
         String result1 = digest.toString(Files.newInputStream(path, StandardOpenOption.READ));
-        assertThat(result1, is("469ce380ff4f5e942b047225682050c36752c18987374c0888a2caeec1564f43926baf3" +
-                "596516c4d4f1279174c05669778d9ab9219c56cb896ec62d8d5a4c213"));
+        assertThat(result1, is("469CE380FF4F5E942B047225682050C36752C18987374C0888A2CAEEC1564F43926BAF3" +
+                "596516C4D4F1279174C05669778D9AB9219C56CB896EC62D8D5A4C213"));
         path = Paths.get(DigestTest.class.getResource("/photo-2.jpg").getFile());
         String result2 = digest.toString(Files.newInputStream(path, StandardOpenOption.READ));
         assertThat(result2, is(result1));
