@@ -1,6 +1,4 @@
-package alvin.digest;
-
-import alvin.util.ByteUtils;
+package alvin.encrypt.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,17 +6,17 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public final class Digest {
+public final class DigestUtil {
 
     private String digestName;
 
-    public Digest(String digestName) {
+    public DigestUtil(String digestName) {
         this.digestName = digestName;
     }
 
     public String toString(byte[] data) throws NoSuchAlgorithmException {
-        MessageDigest md5 = MessageDigest.getInstance(digestName);
-        return ByteUtils.byteArrayToString(md5.digest(data));
+        MessageDigest digest = MessageDigest.getInstance(digestName);
+        return ByteUtil.byteArrayToString(digest.digest(data));
     }
 
     public String toString(String passwd, String encoding)
@@ -27,13 +25,13 @@ public final class Digest {
     }
 
     public String toString(InputStream in) throws IOException, NoSuchAlgorithmException {
-        final MessageDigest md5 = MessageDigest.getInstance(digestName);
+        final MessageDigest digest = MessageDigest.getInstance(digestName);
 
         byte[] buffer = new byte[512];
         int len;
         while ((len = in.read(buffer)) > 0) {
-            md5.update(buffer, 0, len);
+            digest.update(buffer, 0, len);
         }
-        return ByteUtils.byteArrayToString(md5.digest());
+        return ByteUtil.byteArrayToString(digest.digest());
     }
 }
