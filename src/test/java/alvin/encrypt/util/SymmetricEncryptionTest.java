@@ -76,7 +76,7 @@ public class SymmetricEncryptionTest {
         SymmetricEncryption encrypt = new SymmetricEncryption("AES");
         String key = encrypt.makeKeyAsString(256);
 
-        Path srcFile = Paths.get(SymmetricEncryptionTest.class.getResource("/photo-1.jpg").getFile());
+        Path srcFile = Paths.get(SymmetricEncryptionTest.class.getResource("/photo.jpg").getFile());
         Path encFile = Files.createTempFile("test", ".tmp");
         Path decFile = Files.createTempFile("test", ".tmp");
 

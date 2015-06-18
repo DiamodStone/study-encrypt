@@ -27,7 +27,7 @@ public final class Digest {
     public String toString(InputStream in) throws IOException, NoSuchAlgorithmException {
         final MessageDigest digest = MessageDigest.getInstance(digestName);
 
-        byte[] buffer = new byte[512];
+        byte[] buffer = new byte[1024];
         int len;
         while ((len = in.read(buffer)) > 0) {
             digest.update(buffer, 0, len);

@@ -26,10 +26,6 @@ public class SymmetricEncryption {
         return generator.generateKey().getEncoded();
     }
 
-    public int maxKeySize() throws Exception {
-        return Cipher.getMaxAllowedKeyLength(encryptName);
-    }
-
     public String makeKeyAsString(int keySize) throws NoSuchAlgorithmException {
         return ByteUtil.byteArrayToString(makeKey(keySize));
     }

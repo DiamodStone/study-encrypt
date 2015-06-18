@@ -1,6 +1,5 @@
 package alvin.encrypt.util;
 
-import alvin.encrypt.util.ByteUtil;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.is;
@@ -14,12 +13,12 @@ public class ByteUtilTest {
         for (int i = 0; i < array.length; i++) {
             array[i] = (byte) (i + 0xF0);
         }
-        assertThat(ByteUtil.byteArrayToString(array), is("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff"));
+        assertThat(ByteUtil.byteArrayToString(array), is("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF"));
     }
 
     @Test
     public void test_string_to_byte_array() throws Exception {
-        byte[] result = ByteUtil.stringToByteArray("f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff");
+        byte[] result = ByteUtil.stringToByteArray("F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF");
         for (int i = 0; i < result.length; i++) {
             assertThat(result[i], is((byte) (i + 0xF0)));
         }

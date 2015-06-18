@@ -44,7 +44,7 @@ public class AsymmetricEncryptionTest {
         String publicKey = keyPair.getPublicKeyAsString();
         String privateKey = keyPair.getPrivateKeyAsString();
 
-        Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo-1.jpg").getFile());
+        Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo.jpg").getFile());
 
         byte[] sign;
         try (InputStream in = Files.newInputStream(srcFile, StandardOpenOption.READ)) {
