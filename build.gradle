@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
- //   compile
+    compile 'commons-codec:commons-codec:latest.release'
     testCompile 'junit:junit:latest.release',
             'org.hamcrest:hamcrest-all:latest.release',
             'org.mockito:mockito-all:latest.release'

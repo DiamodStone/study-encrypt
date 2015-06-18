@@ -1,6 +1,11 @@
 package alvin.encrypt.util;
 
+import org.apache.commons.codec.binary.Hex;
+
+import javax.crypto.Cipher;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.KeyFactory;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -13,6 +18,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class AsymmetricEncryption {
+    private static final int DEC_BLOCK_SIZE = 128;
+    private static final int ENC_BLOCK_SIZE = DEC_BLOCK_SIZE - 11;
+
     private String encryptName;
 
     public AsymmetricEncryption(String encryptName) {
@@ -52,11 +60,11 @@ public class AsymmetricEncryption {
     }
 
     public byte[] sign(String privateKey, String algorithm, InputStream in) throws Exception {
-        return sign(ByteUtil.stringToByteArray(privateKey), algorithm, in);
+        return sign(Hex.decodeHex(privateKey.toCharArray()), algorithm, in);
     }
 
     public boolean verifySign(String publicKey, String algorithm, InputStream in, byte[] sign) throws Exception {
-        return verifySign(ByteUtil.stringToByteArray(publicKey), algorithm, in, sign);
+        return verifySign(Hex.decodeHex(publicKey.toCharArray()), algorithm, in, sign);
     }
 
     public byte[] sign(byte[] privateKey, String algorithm, byte[] data) throws Exception {
@@ -74,11 +82,75 @@ public class AsymmetricEncryption {
     }
 
     public byte[] sign(String privateKey, String algorithm, byte[] data) throws Exception {
-        return sign(ByteUtil.stringToByteArray(privateKey), algorithm, data);
+        return sign(Hex.decodeHex(privateKey.toCharArray()), algorithm, data);
     }
 
     public boolean verifySign(String publicKey, String algorithm, byte[] data, byte[] sign) throws Exception {
-        return verifySign(ByteUtil.stringToByteArray(publicKey), algorithm, data, sign);
+        return verifySign(Hex.decodeHex(publicKey.toCharArray()), algorithm, data, sign);
+    }
+
+    public byte[] encrypt(byte[] publicKey, byte[] srcData) throws Exception {
+        Cipher cipher = Cipher.getInstance(encryptName);
+        cipher.init(Cipher.ENCRYPT_MODE, createPublicKey(publicKey));
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            for (int i = 0; i < srcData.length; i += ENC_BLOCK_SIZE) {
+                out.write(cipher.doFinal(srcData, i, Math.min(srcData.length - i, ENC_BLOCK_SIZE)));
+            }
+            return out.toByteArray();
+        }
+    }
+
+    public byte[] encrypt(String publicKey, byte[] srcData) throws Exception {
+        return encrypt(Hex.decodeHex(publicKey.toCharArray()), srcData);
+    }
+
+    public byte[] decrypt(byte[] privateKey, byte[] encData) throws Exception {
+        Cipher cipher = Cipher.getInstance(encryptName);
+        cipher.init(Cipher.DECRYPT_MODE, createPrivateKey(privateKey));
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            for (int i = 0; i < encData.length; i += DEC_BLOCK_SIZE) {
+                out.write(cipher.doFinal(encData, i, Math.min(encData.length - i, DEC_BLOCK_SIZE)));
+            }
+            return out.toByteArray();
+        }
+    }
+
+    public byte[] decrypt(String privateKey, byte[] encData) throws Exception {
+        return decrypt(Hex.decodeHex(privateKey.toCharArray()), encData);
+    }
+
+    public long encrypt(byte[] publicKey, InputStream in, OutputStream out) throws Exception {
+        Cipher cipher = Cipher.getInstance(encryptName);
+        cipher.init(Cipher.ENCRYPT_MODE, createPublicKey(publicKey));
+        int count;
+        long total = 0;
+        byte[] buffer = new byte[ENC_BLOCK_SIZE];
+        while ((count = in.read(buffer)) > 0) {
+            out.write(buffer, 0, count);
+            total += count;
+        }
+        return total;
+    }
+
+    public long encrypt(String publicKey, InputStream in, OutputStream out) throws Exception {
+        return encrypt(Hex.decodeHex(publicKey.toCharArray()), in, out);
+    }
+
+    public long decrypt(byte[] privateKey, InputStream in, OutputStream out) throws Exception {
+        Cipher cipher = Cipher.getInstance(encryptName);
+        cipher.init(Cipher.DECRYPT_MODE, createPrivateKey(privateKey));
+        int count;
+        long total = 0;
+        byte[] buffer = new byte[DEC_BLOCK_SIZE];
+        while ((count = in.read(buffer)) > 0) {
+            out.write(buffer, 0, count);
+            total += count;
+        }
+        return total;
+    }
+
+    public long decrypt(String privateKey, InputStream in, OutputStream out) throws Exception {
+        return decrypt(Hex.decodeHex(privateKey.toCharArray()), in, out);
     }
 
     private PublicKey createPublicKey(byte[] keyValue) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -104,11 +176,11 @@ public class AsymmetricEncryption {
         }
 
         public String getPrivateKeyAsString() {
-            return ByteUtil.byteArrayToString(getPrivateKey());
+            return Hex.encodeHexString(getPrivateKey());
         }
 
         public String getPublicKeyAsString() {
-            return ByteUtil.byteArrayToString(getPublicKey());
+            return Hex.encodeHexString(getPublicKey());
         }
     }
 }

@@ -23,18 +23,18 @@ public class DigestTest {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        assertThat(digest.toString(data), is("7ACEDD1A84A4CFCB6E7A16003242945E"));
+        assertThat(digest.toString(data), is("7acedd1a84a4cfcb6e7a16003242945e"));
 
         data[50]++;
-        assertThat(digest.toString(data), is("E17805819B3512436B9F9269F6AA512B"));
+        assertThat(digest.toString(data), is("e17805819b3512436b9f9269f6aa512b"));
     }
 
     @Test
     public void test_md5_with_string() throws Exception {
         Digest digest = new Digest("MD5");
 
-        assertThat(digest.toString("hello", "utf-8"), is("5D41402ABC4B2A76B9719D911017C592"));
-        assertThat(digest.toString("Hello", "utf-8"), is("8B1A9953C4611296A827ABF8C47804D7"));
+        assertThat(digest.toString("hello", "utf-8"), is("5d41402abc4b2a76b9719d911017c592"));
+        assertThat(digest.toString("Hello", "utf-8"), is("8b1a9953c4611296a827abf8c47804d7"));
     }
 
     @Test
@@ -43,7 +43,7 @@ public class DigestTest {
 
         Path srcFile = Paths.get(DigestTest.class.getResource("/photo.jpg").getFile());
         String result1 = digest.toString(Files.newInputStream(srcFile, StandardOpenOption.READ));
-        assertThat(result1, is("B5745948DD3CA6669039D6E847137545"));
+        assertThat(result1, is("b5745948dd3ca6669039d6e847137545"));
 
         Path newFile = Files.createTempFile("photo", ".tmp");
         try {
@@ -62,7 +62,7 @@ public class DigestTest {
 
         Path srcFile = Paths.get(DigestTest.class.getResource("/photo.jpg").getFile());
         String result1 = digest.toString(Files.newInputStream(srcFile, StandardOpenOption.READ));
-        assertThat(result1, is("B5745948DD3CA6669039D6E847137545"));
+        assertThat(result1, is("b5745948dd3ca6669039d6e847137545"));
 
         Path newFile = Files.createTempFile("photo", ".tmp");
         try {
@@ -75,7 +75,7 @@ public class DigestTest {
 
             String result2 = digest.toString(Files.newInputStream(newFile, StandardOpenOption.READ));
             assertThat(result2, not(result1));
-            assertThat(result2, is("860113150D2335BC8E64612D880676CA"));
+            assertThat(result2, is("860113150d2335bc8e64612d880676ca"));
         } finally {
             Files.delete(newFile);
         }
@@ -85,8 +85,8 @@ public class DigestTest {
     public void test_sha1_with_string() throws Exception {
         Digest digest = new Digest("SHA1");
 
-        assertThat(digest.toString("hello", "utf-8"), is("AAF4C61DDCC5E8A2DABEDE0F3B482CD9AEA9434D"));
-        assertThat(digest.toString("Hello", "utf-8"), is("F7FF9E8B7BB2E09B70935A5D785E0CC5D9D0ABF0"));
+        assertThat(digest.toString("hello", "utf-8"), is("aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"));
+        assertThat(digest.toString("Hello", "utf-8"), is("f7ff9e8b7bb2e09b70935a5d785e0cc5d9d0abf0"));
     }
 
     @Test
@@ -95,8 +95,8 @@ public class DigestTest {
 
         Path srcFile = Paths.get(DigestTest.class.getResource("/photo.jpg").getFile());
         String result1 = digest.toString(Files.newInputStream(srcFile, StandardOpenOption.READ));
-        assertThat(result1, is("469CE380FF4F5E942B047225682050C36752C18987374C0888A2CAEEC1564F43926BAF3" +
-                "596516C4D4F1279174C05669778D9AB9219C56CB896EC62D8D5A4C213"));
+        assertThat(result1, is("469ce380ff4f5e942b047225682050c36752c18987374c0888a2caeec1564f43926baf3" +
+                "596516c4d4f1279174c05669778d9ab9219c56cb896ec62d8d5a4c213"));
 
         Path newFile = Files.createTempFile("photo", ".tmp");
         try {

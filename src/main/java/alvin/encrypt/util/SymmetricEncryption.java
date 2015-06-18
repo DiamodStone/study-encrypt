@@ -1,5 +1,7 @@
 package alvin.encrypt.util;
 
+import org.apache.commons.codec.binary.Hex;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -27,7 +29,7 @@ public class SymmetricEncryption {
     }
 
     public String makeKeyAsString(int keySize) throws NoSuchAlgorithmException {
-        return ByteUtil.byteArrayToString(makeKey(keySize));
+        return Hex.encodeHexString(makeKey(keySize));
     }
 
     public byte[] encrypt(byte[] key, byte[] srcData) throws Exception {
@@ -38,7 +40,7 @@ public class SymmetricEncryption {
     }
 
     public byte[] encrypt(String key, byte[] data) throws Exception {
-        return encrypt(ByteUtil.stringToByteArray(key), data);
+        return encrypt(Hex.decodeHex(key.toCharArray()), data);
     }
 
     public byte[] decrypt(byte[] key, byte[] encData) throws Exception {
@@ -49,7 +51,7 @@ public class SymmetricEncryption {
     }
 
     public byte[] decrypt(String key, byte[] data) throws Exception {
-        return decrypt(ByteUtil.stringToByteArray(key), data);
+        return decrypt(Hex.decodeHex(key.toCharArray()), data);
     }
 
     public long encrypt(byte[] key, InputStream in, OutputStream out) throws Exception {
@@ -77,7 +79,7 @@ public class SymmetricEncryption {
     }
 
     public long encrypt(String key, InputStream in, OutputStream out) throws Exception {
-        return encrypt(ByteUtil.stringToByteArray(key), in, out);
+        return encrypt(Hex.decodeHex(key.toCharArray()), in, out);
     }
 
     public long decrypt(byte[] key, InputStream in, OutputStream out) throws Exception {
@@ -98,6 +100,6 @@ public class SymmetricEncryption {
     }
 
     public long decrypt(String key, InputStream in, OutputStream out) throws Exception {
-        return decrypt(ByteUtil.stringToByteArray(key), in, out);
+        return decrypt(Hex.decodeHex(key.toCharArray()), in, out);
     }
 }

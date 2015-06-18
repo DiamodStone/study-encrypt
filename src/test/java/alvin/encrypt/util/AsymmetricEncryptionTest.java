@@ -2,6 +2,7 @@ package alvin.encrypt.util;
 
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
@@ -9,8 +10,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.Base64;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 public class AsymmetricEncryptionTest {
@@ -64,7 +67,7 @@ public class AsymmetricEncryptionTest {
         String publicKey = keyPair.getPublicKeyAsString();
         String privateKey = keyPair.getPrivateKeyAsString();
 
-        Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo-1.jpg").getFile());
+        Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo.jpg").getFile());
         Path tempFile = Files.createTempFile("test", ".tmp");
 
         try {
@@ -86,5 +89,47 @@ public class AsymmetricEncryptionTest {
         } finally {
             Files.delete(tempFile);
         }
+    }
+
+    @Test
+    public void test_rsa_encrypt() throws Exception {
+        final String srcString = "Hello World";
+        final byte[] srcData = srcString.getBytes("UTF-8");
+
+        AsymmetricEncryption encrypt = new AsymmetricEncryption("RSA");
+        AsymmetricEncryption.KeyPair keyPair = encrypt.makeKey(1024);
+
+        String publicKey = keyPair.getPublicKeyAsString();
+        String privateKey = keyPair.getPrivateKeyAsString();
+
+        byte[] encData = encrypt.encrypt(publicKey, srcData);
+        assertThat(srcString, not(new String(encData, "UTF-8")));
+
+        byte[] decData = encrypt.decrypt(privateKey, encData);
+        assertThat(new String(decData, "UTF-8"), is(srcString));
+    }
+
+    @Test
+    public void test_full() throws Exception {
+        final Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo.jpg").toURI());
+        String srcData;
+        byte[] sign;
+
+        // 加密原始数据
+        SymmetricEncryption symmetricEncryption = new SymmetricEncryption("AES");
+        byte[] aesKey = symmetricEncryption.makeKey(256);
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            symmetricEncryption.encrypt(aesKey, Files.newInputStream(srcFile), buffer);
+            srcData = Base64.getEncoder().encodeToString(buffer.toByteArray());
+        }
+
+        AsymmetricEncryption asymmetricEncryption = new AsymmetricEncryption("RSA");
+        AsymmetricEncryption.KeyPair keyPair = asymmetricEncryption.makeKey(1024);
+
+        // 加密密钥
+        String publicKey = keyPair.getPublicKeyAsString();
+        aesKey = asymmetricEncryption.encrypt(publicKey, aesKey);
+
+        // 对密钥签名
     }
 }

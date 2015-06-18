@@ -1,5 +1,7 @@
 package alvin.encrypt.util;
 
+import org.apache.commons.codec.binary.Hex;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -16,7 +18,7 @@ public final class Digest {
 
     public String toString(byte[] data) throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance(digestName);
-        return ByteUtil.byteArrayToString(digest.digest(data));
+        return Hex.encodeHexString(digest.digest(data));
     }
 
     public String toString(String passwd, String encoding)
@@ -32,6 +34,6 @@ public final class Digest {
         while ((len = in.read(buffer)) > 0) {
             digest.update(buffer, 0, len);
         }
-        return ByteUtil.byteArrayToString(digest.digest());
+        return Hex.encodeHexString(digest.digest());
     }
 }
