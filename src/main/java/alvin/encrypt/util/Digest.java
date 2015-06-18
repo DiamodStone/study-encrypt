@@ -6,11 +6,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public final class DigestUtil {
+public final class Digest {
 
     private String digestName;
 
-    public DigestUtil(String digestName) {
+    public Digest(String digestName) {
         this.digestName = digestName;
     }
 
