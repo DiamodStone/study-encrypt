@@ -1,7 +1,10 @@
 package alvin.encrypt.util;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -10,11 +13,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
-import java.util.Base64;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class AsymmetricEncryptionTest {
 
@@ -101,35 +105,88 @@ public class AsymmetricEncryptionTest {
 
         String publicKey = keyPair.getPublicKeyAsString();
         String privateKey = keyPair.getPrivateKeyAsString();
+        int encBlockSize = keyPair.getEncBlockSize();
+        int decBlockSize = keyPair.getDecBlockSize();
 
-        byte[] encData = encrypt.encrypt(publicKey, srcData);
+        byte[] encData = encrypt.encrypt(publicKey, encBlockSize, srcData);
         assertThat(srcString, not(new String(encData, "UTF-8")));
 
-        byte[] decData = encrypt.decrypt(privateKey, encData);
+        byte[] decData = encrypt.decrypt(privateKey, decBlockSize, encData);
         assertThat(new String(decData, "UTF-8"), is(srcString));
     }
 
     @Test
     public void test_full() throws Exception {
         final Path srcFile = Paths.get(AsymmetricEncryptionTest.class.getResource("/photo.jpg").toURI());
-        String srcData;
-        byte[] sign;
-
-        // 加密原始数据
+        AsymmetricEncryption asymmetricEncryption = new AsymmetricEncryption("RSA");
         SymmetricEncryption symmetricEncryption = new SymmetricEncryption("AES");
-        byte[] aesKey = symmetricEncryption.makeKey(256);
-        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-            symmetricEncryption.encrypt(aesKey, Files.newInputStream(srcFile), buffer);
-            srcData = Base64.getEncoder().encodeToString(buffer.toByteArray());
+
+        // A生成一对密钥，并与B共享公钥
+        AsymmetricEncryption.KeyPair keyPairA = asymmetricEncryption.makeKey(2048);
+
+        // B生成一对密钥，并与A共享公钥
+        AsymmetricEncryption.KeyPair keyPairB = asymmetricEncryption.makeKey(2048);
+
+        // A生成文件加密密钥
+        byte[] fileKeyA = symmetricEncryption.makeKey(256);
+
+        // A用B的公钥将文件密钥加密
+        byte[] encFileKeyA = asymmetricEncryption.encrypt(keyPairB.getPublicKey(), keyPairB.getEncBlockSize(), fileKeyA);
+
+        // A用自己的私钥对加密结果签名
+        byte[] signA = asymmetricEncryption.sign(keyPairA.getPrivateKey(), "SHA1", encFileKeyA);
+
+        // A将加密的文件密钥及签名发送给B
+        String encFileKeyContent = Base64.encodeBase64String(encFileKeyA);
+        String signContent = Base64.encodeBase64String(signA);
+
+        // A使用文件密钥将数据加密, 发送给B
+        String encFileContent;
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try (InputStream in = Files.newInputStream(srcFile)) {
+                symmetricEncryption.encrypt(fileKeyA, in, out);
+            }
+            encFileContent = Base64.encodeBase64String(out.toByteArray());
         }
 
-        AsymmetricEncryption asymmetricEncryption = new AsymmetricEncryption("RSA");
-        AsymmetricEncryption.KeyPair keyPair = asymmetricEncryption.makeKey(1024);
+        // ......
 
-        // 加密密钥
-        String publicKey = keyPair.getPublicKeyAsString();
-        aesKey = asymmetricEncryption.encrypt(publicKey, aesKey);
+        // B接收到加密的文件密钥和签名，对利用A的公钥对文件密钥进行验签
+        byte[] encFileKeyB = Base64.decodeBase64(encFileKeyContent);
+        byte[] signB = Base64.decodeBase64(signContent);
+        assertTrue(asymmetricEncryption.verifySign(keyPairA.getPublicKey(), "SHA1", encFileKeyB, signB));
+        assertArrayEquals(encFileKeyB, encFileKeyA);
 
-        // 对密钥签名
+        // B利用自己的私钥对加密的文件密钥进行解密，得到文件密钥
+        byte[] fileKeyB = asymmetricEncryption.decrypt(keyPairB.getPrivateKey(), keyPairB.getDecBlockSize(), encFileKeyB);
+        assertArrayEquals(fileKeyB, fileKeyA);
+
+        // B利用得到的文件密码对文件内容进行解密
+        byte[] encFileData = Base64.decodeBase64(encFileContent);
+        // showFileContent(encFileData);
+
+        byte[] fileData = symmetricEncryption.decrypt(fileKeyB, encFileData);
+
+        int index = 0;
+        try (InputStream in = Files.newInputStream(srcFile)) {
+            int b;
+            while ((b = in.read()) >= 0) {
+                assertThat((byte) b, is(fileData[index++]));
+            }
+        }
+
+        showFileContent(fileData);
+    }
+
+    private void showFileContent(byte[] fileData) {
+        JDialog jd = new JDialog();
+        jd.setModal(true);
+
+        Icon image = new ImageIcon(fileData);
+        jd.add(BorderLayout.CENTER, new JLabel(image));
+
+        jd.pack();
+        jd.setLocationRelativeTo(null);
+        jd.setVisible(true);
     }
 }
