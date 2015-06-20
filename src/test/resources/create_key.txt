@@ -1,0 +1,12 @@
+生成P12证书库（包含私钥）：
+keytool -genkey -v -alias root -keyalg RSA -storetype PKCS12 -keystore KeyStore.p12 -dname "CN=www.wisdomgarden.com,OU=urp,O=WG,L=西安,ST=陕西,C=中国" -storepass urp@wg.com -keypass urp@wg.com -validity 10
+
+查看P12证书库
+keytool -list -keystore KeyStore.p12 -storepass urp@wg.com -storetype pkcs12
+
+
+从证书库中导出CER证书（包含公钥）
+keytool -export -alias root -keystore KeyStore.p12 -storetype PKCS12 -storepass urp@wg.com -rfc -file client.cer
+
+查看导出的CER证书
+keytool -printcert -v -file ./p12client.cer

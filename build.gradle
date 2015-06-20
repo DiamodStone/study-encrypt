@@ -41,11 +41,6 @@ dependencies {
 
 task copyResources << {
     copy {
-        from 'src/main/java'
-        include '**/*.xml'
-        into sourceSets.main.output.classesDir
-    }
-    copy {
         from 'src/test/java'
         include '**/*.xml'
         into sourceSets.test.output.classesDir

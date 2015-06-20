@@ -189,4 +189,23 @@ public class AsymmetricEncryptionTest {
         jd.setLocationRelativeTo(null);
         jd.setVisible(true);
     }
+
+
+    @Test
+    public void test_ca() throws Exception {
+        Path cerFile = Paths.get(SymmetricEncryptionTest.class.getResource("/client.cer").toURI());
+        Path keyStoreFile = Paths.get(SymmetricEncryptionTest.class.getResource("/KeyStore.p12").toURI());
+
+        String publicKey = CAUtil.publicKeyFromCertificateFileAsString(cerFile);
+        String privateKey = CAUtil.privateKeyFromKeyStoreAsString(keyStoreFile, "root", "urp@wg.com");
+
+        final String srcString = "Hello World";
+        final byte[] srcData = srcString.getBytes("UTF-8");
+
+        AsymmetricEncryption asymmetricEncryption = new AsymmetricEncryption("RSA");
+        byte[] encData = asymmetricEncryption.encrypt(publicKey, 245, srcData);
+        byte[] decData = asymmetricEncryption.decrypt(privateKey, 256, encData);
+
+        assertThat(new String(decData, "UTF-8"), is(srcString));
+    }
 }
