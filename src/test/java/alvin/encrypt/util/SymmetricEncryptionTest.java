@@ -110,4 +110,21 @@ public class SymmetricEncryptionTest {
         }
         return true;
     }
+
+    @Test
+    public void test_rc4_enc_and_dec() throws Exception {
+        final String expectedString = "Hello Java";
+        final byte[] expectedData = expectedString.getBytes("UTF-8");
+
+        SymmetricEncryption encrypt = new SymmetricEncryption("RC4");
+
+        String key = encrypt.makeKeyAsString(0);
+        byte[] encData = encrypt.encrypt(key, expectedData);
+
+        assertThat(new String(encData, "UTF-8"), not(expectedString));
+
+        byte[] srcData = encrypt.decrypt(key, encData);
+        assertThat(srcData.length, is(expectedData.length));
+        assertThat(new String(srcData, "UTF-8"), is(expectedString));
+    }
 }
